@@ -1,0 +1,41 @@
+---
+- name: Setup new server
+  hosts: virtualbox
+  become: true
+
+  tasks:
+  - name: Create new user
+    user:
+      name: cloudru
+      password: $6$kuzvJuheG$GpXbxVIZh.T3sjUkKHkfJrLMIzY.VZS1f32OWlE0EE4bmqNaEIS1AbYnIYj0Vltfz3s5SAKeYCGhmgXHqnmEN/
+
+  - name: Enable ssh auth with key
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^#PubkeyAuthentication'
+      line: PubkeyAuthentication yes
+
+  - name: Disallow ssh auth for root
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^#PermitRootLogin'
+      line: PermitRootLogin no
+
+  - name: Create dir .ssh for user if not existing
+    file:
+      path: /home/cloudru/.ssh
+      state: directory
+      owner: cloudru
+      group: cloudru
+
+  - name: Copy public key for cloudru user
+    copy:
+      src: key.pub
+      dest: /home/cloudru/.ssh/authorized_keys
+      owner: cloudru
+      group: cloudru
+
+  - name: Restarts sshd service
+    service:
+      name: sshd
+      state: restarted
