@@ -1,0 +1,3 @@
+imageName: simple-app
+replicas: 3
+author: "Pleshakov Vladislav"
